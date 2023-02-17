@@ -264,6 +264,13 @@
       },
       "url": "https://packages.unity.com"
     },
+    "com.zx.font": {
+      "version": "https://github.com/oovm/ZxFonts.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "f8f836001943338bc86b432bcedb18110eedc9e9"
+    },
     "com.unity.modules.ai": {
       "version": "1.0.0",
       "depth": 0,

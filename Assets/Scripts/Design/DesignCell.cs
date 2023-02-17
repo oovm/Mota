@@ -5,11 +5,12 @@ using UnityEngine.UI;
 
 namespace Design
 {
-    public class DesignCell : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IPointerClickHandler,
+    public class DesignCell : MonoBehaviour,
+        IBeginDragHandler, IEndDragHandler,
+        IPointerClickHandler, IScrollHandler,
         IPointerEnterHandler, IPointerExitHandler
     {
-        public int coordinateX;
-        public int coordinateY;
+        public DesignCellData data;
         public DesignState state;
         public Image image;
         public Image hover;
@@ -36,9 +37,14 @@ namespace Design
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            Debug.Log("DesignCell.OnPointerClick()");
+            state.ShowCellInfo(data);
         }
 
+        public void OnScroll(PointerEventData eventData)
+        {
+            state.ScrollFloor(eventData.scrollDelta.y);
+        }
+        
         public void OnPointerEnter(PointerEventData eventData)
         {
             hover.gameObject.SetActive(true);
@@ -51,7 +57,28 @@ namespace Design
 
         public void Reset()
         {
+            name = data.GetName();
             hover.gameObject.SetActive(false);
+        }
+
+
+    }
+
+    [Serializable]
+    public struct DesignCellData
+    {
+        public byte coordinateX;
+        public byte coordinateY;
+
+        public void SetCoordinate(byte x, byte y)
+        {
+            coordinateX = x;
+            coordinateY = y;
+        }
+
+        public string GetName()
+        {
+            return $"Cell_{coordinateX}_{coordinateY}";
         }
     }
 }

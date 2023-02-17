@@ -6,29 +6,40 @@ namespace Design
     public class DesignState : MonoBehaviour
     {
         public Color CellColor = Color.red;
+        private const byte boardSize = 13;
         public GridLayoutGroup checkerboard;
         public DesignCell template;
+        public DesignInfo info;
 
 
         private void Start()
         {
             template.gameObject.SetActive(false);
-            for (var i = 1; i <= 5; i++)
+            for (byte i = 1; i <= boardSize; i++)
             {
-                for (var j = 1; j <= 5; j++)
+                for (byte j = 1; j <= boardSize; j++)
                 {
                     var go = Instantiate(template, checkerboard.transform);
-                    go.name = $"Cell_{i}_{j}";
-                    go.coordinateX = i;
-                    go.coordinateY = j;
+                    go.data.SetCoordinate(j, i);
                     go.state = this;
+                    go.Reset();
                     go.gameObject.SetActive(true);
                 }
             }
         }
-        
+
         private void Update()
         {
+        }
+
+        public void ShowCellInfo(DesignCellData data)
+        {
+            info.ShowCellInfo(data);
+        }
+
+        public void ScrollFloor(float deltaY)
+        {
+            Debug.Log(deltaY);
         }
     }
 }
