@@ -1,4 +1,15 @@
+
+# IDE
 .idea/
 *.iml
 .vscode/
 .vs/
+
+# unity
+Library/
+Logs/
+obj/
+Temp/
+UserSettings/
+*.csproj
+*.sln
