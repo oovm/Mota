@@ -37,14 +37,13 @@ namespace Player
         /// 无视对方 x 的防御
         /// </summary>
         public double armor_resistance;
-        
+
         /// <summary>
         /// 吸血率, 回复造成伤害 x % 的血量
         ///
         /// 真伤 = 穿透率 >= 100%
         /// </summary>
         public double blood_sucking_rate;
-
 
 
         /// <summary>
