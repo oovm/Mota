@@ -10,78 +10,72 @@ namespace Player
     public struct BattleModel
     {
         public double health;
-        public double attack;
-        public double defense;
+        public DamageModel physical;
         public double shield;
 
         /// <summary>
+        /// 先攻
+        /// 
         /// 由受击方首先攻击, 即便双方都是先攻
         /// </summary>
-        public double realDamage;
+        public bool isAssault;
+
+        /// <summary>
+        /// 坚固, 优先级最高
+        ///
+        /// 管你什么花里胡哨的毒伤点燃吸血真伤, 统统一点伤害
+        /// </summary>
+        public bool isSolid;
 
         /// <summary>
         /// 每次出手追加的真实伤害
+        ///
+        /// 比如中毒, 点燃, 每次出手都会触发一次
+        ///
+        /// 可以是负的, 表示治疗, 同样每次出手都会触发一次
         /// </summary>
-        public bool isRealDamage;
+        public double attack_modifier;
 
         /// <summary>
-        /// 护甲穿透, 无视对方 x% 的防御
-        ///
-        /// 真伤 = 穿透率 >= 100%
+        /// 每回合攻击次数
         /// </summary>
-        public double armor_penetration;
+        public byte attack_times;
 
         /// <summary>
-        /// 护甲抵抗, 抵抗对方 x 点穿透
-        ///
-        /// 无视对方 x 的防御
-        /// </summary>
-        public double armor_resistance;
-
-        /// <summary>
-        /// 吸血率, 回复造成伤害 x % 的血量
-        ///
-        /// 真伤 = 穿透率 >= 100%
+        /// 吸血率, 回复造成伤害 x % 的血量, 可以大于 100%
         /// </summary>
         public double blood_sucking_rate;
 
+        /// <summary>
+        /// 反伤率, 反击造成伤害 x % 的伤害, 可以大于 100%
+        /// </summary>
+        public double retaliation_rate;
+
 
         /// <summary>
-        /// 每回合的有效伤害
+        /// 每回合的血量变化
         /// </summary>
         /// <param name="defender">防御者</param>
         /// <param name="attacker">攻击者</param>
-        /// <returns></returns>
-        public static double EffectiveDamage(BattleModel defender, BattleModel attacker)
+        /// <returns>(防御者血量变化, 攻击者血量变化)</returns>
+        public static (double, double) EffectiveDelta(BattleModel defender, BattleModel attacker)
         {
+            double defender_delta = 0;
+            double attacker_delta = 0;
+
             if (defender.isSolid)
             {
-                return 1;
+                defender_delta = 1;
+            }
+            else
+            {
+                var damage = -DamageModel.EffectiveDamage(defender.physical, attacker.physical);
+                var blood_sucking = damage * attacker.blood_sucking_rate;
             }
 
-            // 抵抗 20%, 穿透 60%, 护甲 200, 攻击 400
-            // 伤害 = lerp(200 * lerp(100% - (60% - 20%), 0, 100), 0)
-            var defense = defender.defense * Math.Clamp(
-                1 - attacker.armor_penetration + defender.armor_resistance,
-                0,
-                1
-            );
-            // damage must > 0
-            return defender.realDamage + Math.Clamp(attacker.attack - defense, 0, double.PositiveInfinity);
+            attacker_delta *= attacker.attack_times;
+            return (defender_delta, attacker_delta);
         }
-
-
-        /// <summary>
-        /// 减伤率 0 ~ 100%
-        ///
-        /// 真伤 = 穿透率 >= 100%
-        /// </summary>
-        [Range(0, 100)] public float damage_reduction;
-
-        /// <summary>
-        /// 是否坚固
-        /// </summary>
-        public bool isSolid;
 
         /// <summary>
         /// return null if infinite damage received
@@ -90,18 +84,29 @@ namespace Player
         /// <returns></returns>
         public double LossHealth(BattleModel other)
         {
-            var my_attack = EffectiveDamage(this, other);
-            var ur_attack = EffectiveDamage(other, this);
-            // 秒杀判定
-            if (ur_attack < 0)
+            var my_action = EffectiveDelta(other, this);
+            var ur_action = EffectiveDelta(this, other);
+            var my_delta = my_action.Item1 + my_action.Item2;
+            var ur_delta = my_action.Item1 + ur_action.Item2;
+            // 回血比伤血快, 不可战胜
+            if (ur_delta >= 0)
             {
-                return 0;
+                return double.PositiveInfinity;
             }
 
-            if (my_attack <= 0) return double.PositiveInfinity;
-            // 敌人的攻击次数
-            var round = other.health / my_attack;
-            return round * ur_attack;
+            var lossHealth = 0.0;
+            var otherHealth = other.health;
+            if (other.isAssault)
+            {
+                // ur_action first
+                // get the round of finish
+                lossHealth += ur_action.Item1;
+                otherHealth += ur_action.Item2;
+            }
+
+            var round = Math.Floor(otherHealth / ur_delta);
+            lossHealth += round * my_delta;
+            return lossHealth;
         }
     }
 }

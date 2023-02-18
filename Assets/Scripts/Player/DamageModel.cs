@@ -35,8 +35,8 @@ namespace Player
         /// <summary>
         /// 单词攻击造成的有效伤害, 必须是正的
         /// </summary>
-        /// <param name="defender"></param>
-        /// <param name="attacker"></param>
+        /// <param name="defender">防御者</param>
+        /// <param name="attacker">攻击者</param>
         /// <returns></returns>
         public static double EffectiveDamage(DamageModel defender, DamageModel attacker)
         {
