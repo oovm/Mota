@@ -1,14 +1,12 @@
 using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 namespace Design
 {
-    public class DesignCell : MonoBehaviour,
-        IBeginDragHandler, IEndDragHandler,
-        IPointerClickHandler, IScrollHandler,
-        IPointerEnterHandler, IPointerExitHandler
+    public class DesignCell : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
     {
         public DesignCellData data;
         public DesignState state;
@@ -24,30 +22,36 @@ namespace Design
         {
         }
 
-        public void OnBeginDrag(PointerEventData eventData)
-        {
-            Debug.Log("DesignCell.OnBeginDrag()");
-            image.color = state.CellColor;
-        }
-
-        public void OnEndDrag(PointerEventData eventData)
-        {
-            Debug.Log("DesignCell.OnEndDrag()");
-        }
-
         public void OnPointerClick(PointerEventData eventData)
         {
+            var pointer = InputSystem.GetDevice<Mouse>();
+            if (pointer.leftButton.isPressed)
+            {
+                image.color = state.CellColor;
+            }
+            else if (pointer.rightButton.isPressed)
+            {
+                image.color = Color.white;
+            }
+
             state.ShowCellInfo(data);
         }
 
-        public void OnScroll(PointerEventData eventData)
-        {
-            state.ScrollFloor(eventData.scrollDelta.y);
-        }
-        
+
         public void OnPointerEnter(PointerEventData eventData)
         {
             hover.gameObject.SetActive(true);
+
+            // use input system
+            var pointer = InputSystem.GetDevice<Mouse>();
+            if (pointer.leftButton.isPressed)
+            {
+                image.color = state.CellColor;
+            }
+            else if (pointer.rightButton.isPressed)
+            {
+                image.color = Color.white;
+            }
         }
 
         public void OnPointerExit(PointerEventData eventData)
@@ -60,8 +64,6 @@ namespace Design
             name = data.GetName();
             hover.gameObject.SetActive(false);
         }
-
-
     }
 
     [Serializable]

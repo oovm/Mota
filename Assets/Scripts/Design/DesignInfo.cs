@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class DesignInfo : MonoBehaviour
 {
+    public TextMeshProUGUI floor;
     public TextMeshProUGUI coordinate;
 
     public void ShowCellInfo(DesignCellData data)
@@ -13,12 +14,13 @@ public class DesignInfo : MonoBehaviour
         coordinate.text = $"坐标: {data.coordinateX}, {data.coordinateY}";
     }
 
-    void Start()
+    private void Start()
     {
+        
     }
 
     // Update is called once per frame
-    void Update()
+    private void Update()
     {
     }
 }
